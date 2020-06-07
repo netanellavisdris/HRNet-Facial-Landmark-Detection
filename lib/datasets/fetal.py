@@ -84,8 +84,20 @@ class FetalLandmarks(data.Dataset):
                                                scale, self.output_size, rot=r)
                 target[i] = generate_target(target[i], tpts[i]-1, self.sigma,
                                             label_type=self.label_type)
+            else:
+                print ("ERROR!!!!!")
+
+        #TODO: Remove
+        if tpts[0,0] > tpts[1,0]:
+            tmp = tpts[0, :].copy()
+            tpts[0, :] = tpts[1, :]
+            tpts[1, :] = tmp
+            target = np.zeros((nparts, self.output_size[0], self.output_size[1]))
+            for i in range(nparts):
+                target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
+                                            label_type=self.label_type)
         img = img.astype(np.float32)
-        img = (img/255.0 - self.mean) / self.std
+        #img = (img/255.0 - self.mean) / self.std
         img = img.transpose([2, 0, 1])
         target = torch.Tensor(target)
         tpts = torch.Tensor(tpts)
