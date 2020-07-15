@@ -13,8 +13,15 @@ import pandas as pd
 from PIL import Image
 import numpy as np
 
+import cv2
+import scipy
+import scipy.misc
+
 from ..utils.transforms import fliplr_joints, crop, generate_target, transform_pixel
 
+curidx = 0
+out_dir = "/tmp/OutTrain"
+os.makedirs(out_dir, exist_ok=True)
 
 class FetalLandmarks(data.Dataset):
 
@@ -35,6 +42,7 @@ class FetalLandmarks(data.Dataset):
         self.rot_factor = cfg.DATASET.ROT_FACTOR
         self.label_type = cfg.MODEL.TARGET_TYPE
         self.flip = cfg.DATASET.FLIP
+        self.reassign = cfg.TRAIN.REASSIGN
 
         # load annotations
         self.landmarks_frame = pd.read_csv(self.csv_file)
@@ -58,7 +66,7 @@ class FetalLandmarks(data.Dataset):
         pts = self.landmarks_frame.iloc[idx, 4:].values
         pts = pts.astype('float').reshape(-1, 2)
 
-        scale *= 1.25
+        scale *= 1.7
         nparts = pts.shape[0]
         img = np.array(Image.open(image_path).convert('RGB'), dtype=np.float32)
 
@@ -87,17 +95,28 @@ class FetalLandmarks(data.Dataset):
             else:
                 print ("ERROR!!!!!")
 
-        #TODO: Remove
-        if tpts[0,0] > tpts[1,0]:
-            tmp = tpts[0, :].copy()
-            tpts[0, :] = tpts[1, :]
-            tpts[1, :] = tmp
-            target = np.zeros((nparts, self.output_size[0], self.output_size[1]))
-            for i in range(nparts):
-                target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
-                                            label_type=self.label_type)
+        # TODO: Remove
+        if self.reassign :
+            if tpts[0,0] > tpts[1,0]:
+                # print ('Right')
+                pass
+            else:
+                # print('Left')
+                tmp = tpts[0, :].copy()
+                tpts[0, :] = tpts[1, :]
+                tpts[1, :] = tmp
+                target = np.zeros((nparts, self.output_size[0], self.output_size[1])) #We need to
+                for i in range(nparts):
+                    target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
+                                                label_type=self.label_type)
         img = img.astype(np.float32)
-        #img = (img/255.0 - self.mean) / self.std
+
+        # newimg = img.copy()
+        # newimg[:, :, 1] = scipy.misc.imresize(target[0], (256, 256))
+        # newimg[:, :, 2] = scipy.misc.imresize(target[1], (256, 256))
+        # cv2.imwrite(os.path.join(out_dir, "img{}_ttindex{}.png".format(idx, curidx)), newimg)
+        # globals()["curidx"] = curidx + 1
+        img = (img/255.0 - self.mean) / self.std
         img = img.transpose([2, 0, 1])
         target = torch.Tensor(target)
         tpts = torch.Tensor(tpts)

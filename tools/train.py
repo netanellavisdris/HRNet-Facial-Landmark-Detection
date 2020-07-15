@@ -21,7 +21,7 @@ from lib.config import config, update_config
 from lib.datasets import get_dataset
 from lib.core import function
 from lib.utils import utils
-
+import torch.nn.functional as F
 
 def parse_args():
 
@@ -34,6 +34,18 @@ def parse_args():
     update_config(config, args)
     return args
 
+def FuseLoss(output, target):
+    output_fl = torch.sum(output, axis=1)
+    target_fl = torch.sum(target, axis=1)
+
+    return F.mse_loss(output, target, size_average=True) + F.mse_loss(output_fl, target_fl, size_average=True)
+
+
+def FuseLossV2(output, target):
+    output_fl = torch.sum(output, axis=1)
+    target_fl = torch.sum(target, axis=1)
+
+    return F.mse_loss(output, target, size_average=True) + 0.5*F.mse_loss(output_fl, target_fl, size_average=True)
 
 def main():
 
@@ -62,7 +74,14 @@ def main():
     model = nn.DataParallel(model, device_ids=gpus).cuda()
 
     # loss
-    criterion = torch.nn.MSELoss(size_average=True).cuda()
+    if config.TRAIN.CRITERION == 'MSE':
+        criterion = torch.nn.MSELoss(size_average=True).cuda()
+    elif config.TRAIN.CRITERION == 'FUSE':
+        criterion = FuseLoss
+    elif config.TRAIN.CRITERION == 'FUSEV2':
+        criterion = FuseLossV2
+    else:
+        raise ValueError('Criterion not defined')
 
     optimizer = utils.get_optimizer(config, model)
     best_nme = 100
@@ -111,11 +130,11 @@ def main():
     )
 
     for epoch in range(last_epoch, config.TRAIN.END_EPOCH):
-        lr_scheduler.step()
+
 
         function.train(config, train_loader, model, criterion,
                        optimizer, epoch, writer_dict)
-
+        lr_scheduler.step()
         # evaluate
         nme, predictions = function.validate(config, val_loader, model,
                                              criterion, epoch, writer_dict)
