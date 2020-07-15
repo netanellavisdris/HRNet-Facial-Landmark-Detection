@@ -63,6 +63,27 @@ def compute_nme(preds, meta):
     return rmse
 
 
+def compute_l1dist(preds, meta):
+
+    targets = meta['pts']
+    preds = preds.numpy()
+    target = targets.cpu().numpy()
+
+    N = preds.shape[0]
+    L = preds.shape[1]
+    rmse = np.zeros(N)
+
+    for i in range(N):
+        pts_pred, pts_gt = preds[i, ], target[i, ]
+
+        if L == 2: #Fetal
+            interocular = np.linalg.norm(pts_gt[0, ] - pts_gt[1, ])
+        else:
+            raise ValueError('Number of landmarks is wrong')
+        rmse[i] = np.abs(np.linalg.norm(pts_gt[0,] - pts_gt[1,]) - np.linalg.norm(pts_pred[0,] - pts_pred[1,]))
+
+    return rmse
+
 def decode_preds(output, center, scale, res):
     coords = get_preds(output)  # float type
 

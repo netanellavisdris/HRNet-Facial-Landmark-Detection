@@ -14,7 +14,7 @@ import logging
 import torch
 import numpy as np
 
-from .evaluation import decode_preds, compute_nme
+from .evaluation import decode_preds, compute_nme, compute_l1dist
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,9 @@ def train(config, train_loader, model, critertion, optimizer,
     nme_count = 0
     nme_batch_sum = 0
 
+    l1_count = 0
+    l1_batch_sum = 0
+
     end = time.time()
 
     for i, (inp, target, meta) in enumerate(train_loader):
@@ -62,7 +65,10 @@ def train(config, train_loader, model, critertion, optimizer,
         output = model(inp)
         target = target.cuda(non_blocking=True)
 
-        loss = critertion(output, target)
+        output_fl = torch.sum(output, axis=1)
+        target_fl = torch.sum(target, axis=1)
+
+        loss = critertion(output, target) #+ critertion(output_fl, target_fl)
 
         # NME
         score_map = output.data.cpu()
@@ -71,6 +77,11 @@ def train(config, train_loader, model, critertion, optimizer,
         nme_batch = compute_nme(preds, meta)
         nme_batch_sum = nme_batch_sum + np.sum(nme_batch)
         nme_count = nme_count + preds.size(0)
+
+        # Calculate average L1 difference
+        l1_batch = compute_l1dist(preds, meta)
+        l1_batch_sum = l1_batch_sum + np.sum(l1_batch)
+        l1_count = l1_count + preds.size(0)
 
         # optimize
         optimizer.zero_grad()
@@ -99,8 +110,10 @@ def train(config, train_loader, model, critertion, optimizer,
 
         end = time.time()
     nme = nme_batch_sum / nme_count
-    msg = 'Train Epoch {} time:{:.4f} loss:{:.4f} nme:{:.4f}'\
-        .format(epoch, batch_time.avg, losses.avg, nme)
+    l1 = l1_batch_sum / l1_count
+
+    msg = 'Train Epoch {} time:{:.4f} loss:{:.4f} nme:{:.4f} l1:{:.2f}'\
+        .format(epoch, batch_time.avg, losses.avg, nme, l1)
     logger.info(msg)
 
 
@@ -121,6 +134,8 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
     count_failure_010 = 0
     end = time.time()
 
+    l1_count = 0
+    l1_batch_sum = 0
     with torch.no_grad():
         for i, (inp, target, meta) in enumerate(val_loader):
             data_time.update(time.time() - end)
@@ -142,6 +157,12 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
 
             nme_batch_sum += np.sum(nme_temp)
             nme_count = nme_count + preds.size(0)
+
+            # Calculate average L1 difference
+            l1_batch = compute_l1dist(preds, meta)
+            l1_batch_sum = l1_batch_sum + np.sum(l1_batch)
+            l1_count = l1_count + preds.size(0)
+
             for n in range(score_map.size(0)):
                 predictions[meta['index'][n], :, :] = preds[n, :, :]
 
@@ -155,9 +176,11 @@ def validate(config, val_loader, model, criterion, epoch, writer_dict):
     failure_008_rate = count_failure_008 / nme_count
     failure_010_rate = count_failure_010 / nme_count
 
+    l1 = l1_batch_sum / l1_count
+
     msg = 'Test Epoch {} time:{:.4f} loss:{:.4f} nme:{:.4f} [008]:{:.4f} ' \
-          '[010]:{:.4f}'.format(epoch, batch_time.avg, losses.avg, nme,
-                                failure_008_rate, failure_010_rate)
+          '[010]:{:.4f} l1:{:.2f}'.format(epoch, batch_time.avg, losses.avg, nme,
+                                failure_008_rate, failure_010_rate, l1)
     logger.info(msg)
 
     if writer_dict:
