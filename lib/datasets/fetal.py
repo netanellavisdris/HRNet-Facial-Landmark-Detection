@@ -12,10 +12,12 @@ import torch.utils.data as data
 import pandas as pd
 from PIL import Image
 import numpy as np
+import matplotlib.pyplot as plt
 
 import cv2
 import scipy
 import scipy.misc
+from sklearn.mixture import GaussianMixture
 
 from ..utils.transforms import fliplr_joints, crop, generate_target, transform_pixel
 
@@ -45,7 +47,11 @@ class FetalLandmarks(data.Dataset):
         self.reassign = cfg.TRAIN.REASSIGN
 
         # load annotations
-        self.landmarks_frame = pd.read_csv(self.csv_file)
+        self.landmarks_frame = pd.read_csv(self.csv_file, header=0)
+        self.landmarks_frame.drop(self.landmarks_frame.columns[0], axis=1, inplace=True)
+        
+        if is_train:
+            self.d_vect = determine_direction(np.array(self.landmarks_frame.iloc[1:, 9:13].values, dtype=np.float32))
 
         self.mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
         self.std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -54,7 +60,9 @@ class FetalLandmarks(data.Dataset):
         return len(self.landmarks_frame)
 
     def __getitem__(self, idx):
-
+        
+        # idx += 1
+        
         image_path = os.path.join(self.data_root,
                                   self.landmarks_frame.iloc[idx, 0])
         scale = self.landmarks_frame.iloc[idx, 1]
@@ -63,7 +71,7 @@ class FetalLandmarks(data.Dataset):
         center_h = self.landmarks_frame.iloc[idx, 3]
         center = torch.Tensor([center_w, center_h])
 
-        pts = self.landmarks_frame.iloc[idx, 4:].values
+        pts = self.landmarks_frame.iloc[idx, 9:13].values
         pts = pts.astype('float').reshape(-1, 2)
 
         scale *= 1.7
@@ -97,18 +105,19 @@ class FetalLandmarks(data.Dataset):
 
         # TODO: Remove
         if self.reassign :
-            if tpts[0,0] > tpts[1,0]:
-                # print ('Right')
-                pass
-            else:
-                # print('Left')
-                tmp = tpts[0, :].copy()
-                tpts[0, :] = tpts[1, :]
-                tpts[1, :] = tmp
-                target = np.zeros((nparts, self.output_size[0], self.output_size[1])) #We need to
-                for i in range(nparts):
-                    target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
-                                                label_type=self.label_type)
+            # if tpts[0,0] > tpts[1,0]:
+            #     # print ('Right')
+            #     pass
+            # else:
+            #     # print('Left')
+            #     tmp = tpts[0, :].copy()
+            #     tpts[0, :] = tpts[1, :]
+            #     tpts[1, :] = tmp
+            tpts = classify_direction(tpts, self.d_vect)
+            target = np.zeros((nparts, self.output_size[0], self.output_size[1])) #We need to
+            for i in range(nparts):
+                target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
+                                            label_type=self.label_type)
         img = img.astype(np.float32)
 
         # newimg = img.copy()
@@ -127,6 +136,28 @@ class FetalLandmarks(data.Dataset):
 
         return img, target, meta
 
+def determine_direction(pts_arr, do_plot = False):
+    gmm = GaussianMixture(n_components=2)
+    gmm.fit(pts_arr)
+    if  do_plot:
+        plt.scatter(pts_arr[::2,0], pts_arr[::2,1], alpha=1)
+        plt.scatter(pts_arr[1::2,0], pts_arr[1::2,1], color='r', alpha=1)
+        plt.plot(gmm.means_[:,0], gmm.means_[:,1], color='k')
+    
+    return gmm.means_
+
+def classify_direction(pts_arr, d_pts):
+    d_vector = d_pts[1,:] - d_pts[0,:]
+    ap = pts_arr
+    pt_part1 = np.dot(d_vector[np.newaxis,:], ap.T) / np.linalg.norm(d_vector)
+    pts_class = pt_part1.flatten()
+    pts_class = pts_class.reshape(-1, 2)
+    pts_class = np.stack((np.argmin(pts_class, axis=1), np.argmax(pts_class, axis=1)), axis=1)
+    
+    pts_remap = pts_class + (np.arange(pts_class.shape[0]) * 2)[:, np.newaxis]
+    ret_pts = pts_arr[pts_remap]
+    
+    return ret_pts
 
 if __name__ == '__main__':
 
