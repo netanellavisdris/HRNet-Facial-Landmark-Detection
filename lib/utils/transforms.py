@@ -32,7 +32,7 @@ MATCHED_PARTS = {
              [88, 92], [89, 91], [95, 93], [96, 97]),
     "FETAL": ([1, 2],)}
 
-
+# This function flips the x-coordinates of landmark points across the y-axis and swaps corresponding symmetric landmarks based on predefined matching parts for various datasets.
 def fliplr_joints(x, width, dataset='aflw'):
     """
     flip coords
@@ -68,7 +68,7 @@ def get_dir(src_point, rot_rad):
 
     return src_result
 
-
+# Calculates the affine transformation matrix to apply transformations such as translation, rotation, and scaling to the image.
 def get_affine_transform(
         center, scale, rot, output_size,
         shift=np.array([0, 0], dtype=np.float32), inv=0):
@@ -102,7 +102,7 @@ def get_affine_transform(
 
     return trans
 
-
+# Crops the image based on the center, scale, and rotation parameters using the affine transformation matrix.
 def crop_v2(img, center, scale, output_size, rot=0):
     trans = get_affine_transform(center, scale, rot, output_size)
 
@@ -113,7 +113,7 @@ def crop_v2(img, center, scale, output_size, rot=0):
 
     return dst_img
 
-
+# Transform pixel coordinates based on the affine matrix, supporting operations like scaling and rotation.
 def get_transform(center, scale, output_size, rot=0):
     """
     General image processing functions
@@ -160,7 +160,7 @@ def transform_preds(coords, center, scale, output_size):
         coords[p, 0:2] = torch.tensor(transform_pixel(coords[p, 0:2], center, scale, output_size, 1, 0))
     return coords
 
-
+# Cropping function that supports rotation and scaling. It first resizes the image to make the cropping operation more efficient, then computes the crop region, and finally extracts and optionally rotates the crop region.
 def crop(img, center, scale, output_size, rot=0):
     center_new = center.clone()
 
@@ -177,8 +177,11 @@ def crop(img, center, scale, output_size, rot=0):
             return torch.zeros(output_size[0], output_size[1], img.shape[2]) \
                         if len(img.shape) > 2 else torch.zeros(output_size[0], output_size[1])
         else:
-            img = scipy.misc.imresize(img, [new_ht, new_wd])  # (0-1)-->(0-255)
-            # img = Image.fromarray(img).resize(size=(new_ht, new_wd))
+            # img = scipy.misc.imresize(img, [new_ht, new_wd])  # (0-1)-->(0-255)
+            img = (img * 255).astype(np.uint8)
+            img = Image.fromarray(img)
+            img = img.resize((new_wd, new_ht), Image.BILINEAR)
+            img = np.array(img).astype(np.float32)
             center_new[0] = center_new[0] * 1.0 / sf
             center_new[1] = center_new[1] * 1.0 / sf
             scale = scale / sf
@@ -212,11 +215,14 @@ def crop(img, center, scale, output_size, rot=0):
         # Remove padding
         new_img = scipy.misc.imrotate(new_img, rot)
         new_img = new_img[pad:-pad, pad:-pad]
-    new_img = scipy.misc.imresize(new_img, output_size)
-    # new_img = Image.fromarray(img).resize(size=(new_img, output_size))
+    # new_img = scipy.misc.imresize(new_img, output_size)
+    new_img = (new_img * 255).astype(np.uint8)
+    new_img = Image.fromarray(new_img)
+    new_img = new_img.resize((output_size[0], output_size[1]), Image.BILINEAR)
+    new_img = np.array(new_img).astype(np.float32)
     return new_img
 
-
+#  Generates a Gaussian or other types of heatmap for a given landmark point. 
 def generate_target(img, pt, sigma, label_type='Gaussian'):
     # Check that any part of the gaussian is in-bounds
     tmp_size = sigma * 3

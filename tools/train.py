@@ -38,14 +38,14 @@ def FuseLoss(output, target):
     output_fl = torch.sum(output, axis=1)
     target_fl = torch.sum(target, axis=1)
 
-    return F.mse_loss(output, target, size_average=True) + F.mse_loss(output_fl, target_fl, size_average=True)
+    return F.mse_loss(output, target, reduction='mean') + F.mse_loss(output_fl, target_fl, reduction='mean')
 
 
 def FuseLossV2(output, target):
     output_fl = torch.sum(output, axis=1)
     target_fl = torch.sum(target, axis=1)
 
-    return F.mse_loss(output, target, size_average=True) + 0.5*F.mse_loss(output_fl, target_fl, size_average=True)
+    return F.mse_loss(output, target, reduction='mean') + 0.5*F.mse_loss(output_fl, target_fl, reduction='mean')
 
 def main():
 
@@ -75,7 +75,7 @@ def main():
 
     # loss
     if config.TRAIN.CRITERION == 'MSE':
-        criterion = torch.nn.MSELoss(size_average=True).cuda()
+        criterion = torch.nn.MSELoss(reduction='mean').cuda()
     elif config.TRAIN.CRITERION == 'FUSE':
         criterion = FuseLoss
     elif config.TRAIN.CRITERION == 'FUSEV2':
