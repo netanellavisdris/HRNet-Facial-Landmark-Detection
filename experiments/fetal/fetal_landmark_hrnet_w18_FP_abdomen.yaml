@@ -4,21 +4,13 @@ PRINT_FREQ: 50
 
 DATASET:
   DATASET: FETAL
-  # ROOT: './data/fetal/images_full'
-  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/BPD'
-  # ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/Abdomen'
-  # ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/Femur'
-  # TRAINSET: './data/fetal/images_full_noaugtrials.csv'
-  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/BPD_Train.csv'
-  # TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Train.csv'
-  # TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Femur_Train.csv'
-  # TESTSET: './data/fetal/images_full_noaugtrials.csv'
-  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/BPD_Test.csv'
-  # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Test.csv'
-  # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Femur_Test.csv'
+  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/Abdomen'
+  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Train.csv'
+  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Test.csv'
+  ANATOMY: 'abdomen'
   FLIP: true
-  SCALE_FACTOR: 0.1
-  ROT_FACTOR: 0
+  SCALE_FACTOR: 0.25
+  ROT_FACTOR: 30
 MODEL:
   NAME: 'hrnet'
   NUM_JOINTS: 2

@@ -45,13 +45,17 @@ class FetalLandmarks(data.Dataset):
         self.label_type = cfg.MODEL.TARGET_TYPE
         self.flip = cfg.DATASET.FLIP
         self.reassign = cfg.TRAIN.REASSIGN
+        self.anatomy = cfg.DATASET.ANATOMY
 
         # load annotations
         self.landmarks_frame = pd.read_csv(self.csv_file, header=0)
         self.landmarks_frame.drop(self.landmarks_frame.columns[0], axis=1, inplace=True)
         
         if is_train:
-            self.d_vect = determine_direction(np.array(self.landmarks_frame.iloc[1:, 9:13].values, dtype=np.float32))
+            if cfg.DATASET.ANATOMY == 'brain' or cfg.DATASET.ANATOMY == 'abdomen':
+                self.d_vect = determine_direction(np.array(self.landmarks_frame.iloc[1:, 9:13].values, dtype=np.float32))
+            else:
+                self.d_vect = determine_direction(np.array(self.landmarks_frame.iloc[1:, 5:9].values, dtype=np.float32))
 
         self.mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
         self.std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -71,7 +75,10 @@ class FetalLandmarks(data.Dataset):
         center_h = self.landmarks_frame.iloc[idx, 3]
         center = torch.Tensor([center_w, center_h])
 
-        pts = self.landmarks_frame.iloc[idx, 9:13].values
+        if self.anatomy == 'brain' or self.anatomy == 'abdomen':
+            pts = self.landmarks_frame.iloc[idx, 9:13].values
+        else:
+            pts = self.landmarks_frame.iloc[idx, 5:9].values
         pts = pts.astype('float').reshape(-1, 2)
 
         scale *= 1.7
@@ -120,11 +127,15 @@ class FetalLandmarks(data.Dataset):
                                             label_type=self.label_type)
         img = img.astype(np.float32)
 
-        # newimg = img.copy()
+        newimg = img.copy()
+        newimg = (newimg * 255).astype(np.uint8)
+        newimg = Image.fromarray(newimg)
+        newimg = newimg.resize((256, 256), Image.BILINEAR)
+        newimg = np.array(newimg).astype(np.float32)
         # newimg[:, :, 1] = scipy.misc.imresize(target[0], (256, 256))
         # newimg[:, :, 2] = scipy.misc.imresize(target[1], (256, 256))
-        # cv2.imwrite(os.path.join(out_dir, "img{}_ttindex{}.png".format(idx, curidx)), newimg)
-        # globals()["curidx"] = curidx + 1
+        cv2.imwrite(os.path.join(out_dir, "img{}_ttindex{}.png".format(idx, curidx)), newimg)
+        globals()["curidx"] = curidx + 1
         img = (img/255.0 - self.mean) / self.std
         img = img.transpose([2, 0, 1])
         target = torch.Tensor(target)
