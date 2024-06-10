@@ -15,8 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import cv2
-import scipy
-import scipy.misc
 from sklearn.mixture import GaussianMixture
 
 from ..utils.transforms import fliplr_joints, crop, generate_target, transform_pixel
@@ -84,6 +82,9 @@ class FetalLandmarks(data.Dataset):
         scale *= 1.7
         nparts = pts.shape[0]
         img = np.array(Image.open(image_path).convert('RGB'), dtype=np.float32)
+        # img = cv2.imread(image_path).astype(np.float32)
+        # img = cv2.imread(image_path)  # Using OpenCV to read the image
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)  # Convert BGR to RGB
 
         r = 0
         if self.is_train:
@@ -128,15 +129,15 @@ class FetalLandmarks(data.Dataset):
         img = img.astype(np.float32)
 
         newimg = img.copy()
-        newimg = (newimg * 255).astype(np.uint8)
-        newimg = Image.fromarray(newimg)
-        newimg = newimg.resize((256, 256), Image.BILINEAR)
-        newimg = np.array(newimg).astype(np.float32)
         # newimg[:, :, 1] = scipy.misc.imresize(target[0], (256, 256))
         # newimg[:, :, 2] = scipy.misc.imresize(target[1], (256, 256))
+        newimg[:, :, 1] = cv2.resize(target[0], (256, 256), interpolation=cv2.INTER_CUBIC)
+        newimg[:, :, 2] = cv2.resize(target[1], (256, 256), interpolation=cv2.INTER_CUBIC)
+        newimg = np.clip(newimg, 0, 255).astype(np.uint8)  # Ensure valid range and type for saving
+        newimg = cv2.cvtColor(newimg, cv2.COLOR_RGB2BGR)  # Convert back to BGR for saving
         cv2.imwrite(os.path.join(out_dir, "img{}_ttindex{}.png".format(idx, curidx)), newimg)
         globals()["curidx"] = curidx + 1
-        img = (img/255.0 - self.mean) / self.std
+        img = (img / 255.0 - self.mean) / self.std
         img = img.transpose([2, 0, 1])
         target = torch.Tensor(target)
         tpts = torch.Tensor(tpts)

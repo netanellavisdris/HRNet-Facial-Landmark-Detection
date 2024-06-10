@@ -8,7 +8,9 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
 os.getcwd()
+
 
 import pprint
 import argparse
