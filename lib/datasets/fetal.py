@@ -48,13 +48,26 @@ class FetalLandmarks(data.Dataset):
         # load annotations
         self.landmarks_frame = pd.read_csv(self.csv_file, header=0, sep=',')
         self.landmarks_frame.drop(self.landmarks_frame.columns[0], axis=1, inplace=True)
-        
+
+        # Remove rows where any landmarks are negative
+        if self.anatomy == 'brain' or self.anatomy == 'abdomen':
+            landmark_cols = self.landmarks_frame.columns[8:12]
+        else:
+            landmark_cols = self.landmarks_frame.columns[4:8]
+
+        mask = (self.landmarks_frame[landmark_cols] < 0).any(axis=1)
+        self.landmarks_frame = self.landmarks_frame[~mask].reset_index(drop=True)
+
         if is_train:
-            if cfg.DATASET.ANATOMY == 'brain' or cfg.DATASET.ANATOMY == 'abdomen':
-                self.d_vect = determine_direction(np.array(self.landmarks_frame.iloc[1:, 9:13].values, dtype=np.float32))
-                print(f'd_vect: {self.d_vect}')
+            if self.anatomy == 'brain' or self.anatomy == 'abdomen':
+                landmarks = np.array(self.landmarks_frame.iloc[1:, 8:12].values, dtype=np.float32)
+                print(landmarks)
+                landmarks = landmarks.reshape(-1, 2)
+                self.d_vect = determine_direction(landmarks)
             else:
-                self.d_vect = determine_direction(np.array(self.landmarks_frame.iloc[1:, 5:9].values, dtype=np.float32))
+                landmarks = np.array(self.landmarks_frame.iloc[1:, 4:8].values, dtype=np.float32)
+                landmarks = landmarks.reshape(-1, 2)
+                self.d_vect = determine_direction(landmarks)
 
         self.mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
         self.std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -75,9 +88,9 @@ class FetalLandmarks(data.Dataset):
         center = torch.Tensor([center_w, center_h])
 
         if self.anatomy == 'brain' or self.anatomy == 'abdomen':
-            pts = self.landmarks_frame.iloc[idx, 9:13].values
+            pts = self.landmarks_frame.iloc[idx, 8:12].values
         else:
-            pts = self.landmarks_frame.iloc[idx, 5:9].values
+            pts = self.landmarks_frame.iloc[idx, 4:8].values
         
         pts = pts[[1,0,3,2]]
         pts = pts.astype('float').reshape(-1, 2)
@@ -90,8 +103,6 @@ class FetalLandmarks(data.Dataset):
         scale *= 1.7
         nparts = pts.shape[0]
         img = np.array(Image.open(image_path).convert('RGB'), dtype=np.float32)
-        # img = cv2.imread(image_path)  # Using OpenCV to read the image
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)  # Convert BGR to RGB
 
         r = 0
         if self.is_train:
@@ -119,31 +130,31 @@ class FetalLandmarks(data.Dataset):
             else:
                 print ("ERROR HERE!!!!!")
         
-
         # TODO: Remove
-        if self.reassign :
-            # if tpts[0,0] > tpts[1,0]:
-            #     # print ('Right')
-            #     pass
-            # else:
-            #     # print('Left')
-            #     tmp = tpts[0, :].copy()
-            #     tpts[0, :] = tpts[1, :]
-            #     tpts[1, :] = tmp
-            print(f'shape of d_vect: {self.d_vect.shape}')
-            tpts = classify_direction(tpts, self.d_vect)
-            print(f'tpts in self.reassign: {tpts}')
-            target = np.zeros((nparts, self.output_size[0], self.output_size[1])) 
-            for i in range(nparts):
-                target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
-                                            label_type=self.label_type)
+        if self.is_train:
+            if self.reassign :
+                # if tpts[0,0] > tpts[1,0]:
+                #     # print ('Right')
+                #     pass
+                # else:
+                #     # print('Left')
+                #     tmp = tpts[0, :].copy()
+                #     tpts[0, :] = tpts[1, :]
+                #     tpts[1, :] = tmp
+                tpts = classify_direction(tpts, self.d_vect)
+                tpts = tpts.reshape(-1, 2)
+                target = np.zeros((nparts, self.output_size[0], self.output_size[1])) 
+                for i in range(nparts):
+                    target[i] = generate_target(target[i], tpts[i] - 1, self.sigma,
+                                                label_type=self.label_type)
         img = img.astype(np.float32)
 
         newimg = img.copy()
+        # print(f'newimg.shape: {newimg.shape}')
         # newimg[:, :, 1] = scipy.misc.imresize(target[0], (256, 256))
         # newimg[:, :, 2] = scipy.misc.imresize(target[1], (256, 256))
-        newimg[:, :, 1] = cv2.resize(target[0]*255, (256, 256), interpolation=cv2.INTER_CUBIC)
-        newimg[:, :, 2] = cv2.resize(target[1]*255, (256, 256), interpolation=cv2.INTER_CUBIC)
+        newimg[:, :, 1] = cv2.resize(target[0]*255, (256, 256), interpolation=cv2.INTER_LINEAR)
+        newimg[:, :, 2] = cv2.resize(target[1]*255, (256, 256), interpolation=cv2.INTER_LINEAR)
         newimg = cv2.cvtColor(newimg, cv2.COLOR_RGB2BGR)  # Convert back to BGR for saving
         # cv2.imwrite(os.path.join(out_dir, "img{}_ttindex{}.png".format(idx, curidx)), newimg)
         globals()["curidx"] = curidx + 1
@@ -158,7 +169,7 @@ class FetalLandmarks(data.Dataset):
 
         return img, target, meta
 
-def determine_direction(pts_arr, do_plot = False):
+def determine_direction(pts_arr, do_plot = True):
     gmm = GaussianMixture(n_components=2)
     gmm.fit(pts_arr)
     if  do_plot:
