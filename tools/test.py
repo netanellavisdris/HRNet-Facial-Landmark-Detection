@@ -55,6 +55,7 @@ def main():
 
     gpus = list(config.GPUS)
     model = nn.DataParallel(model, device_ids=gpus).cuda()
+    # model.cuda()
 
     # load model
     state_dict = torch.load(args.model_file)

@@ -11,16 +11,12 @@ DATASET:
   FLIP: true
   SCALE_FACTOR: 0.25
   ROT_FACTOR: 30
-  # FLIP: false
-  # SCALE_FACTOR: 0.0
-  # ROT_FACTOR: 0
 MODEL:
   NAME: 'hrnet'
   NUM_JOINTS: 2
   INIT_WEIGHTS: true
   PRETRAINED: 'hrnetv2_pretrained/hrnetv2_w18_imagenet_pretrained.pth'
   SIGMA: 1.0
-  # SIGMA: 10.0
   IMAGE_SIZE:
     - 256
     - 256

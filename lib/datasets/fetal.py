@@ -47,6 +47,7 @@ class FetalLandmarks(data.Dataset):
 
         # load annotations
         self.landmarks_frame = pd.read_csv(self.csv_file, header=0, sep=',')
+        # Drop 'index' column
         self.landmarks_frame.drop(self.landmarks_frame.columns[0], axis=1, inplace=True)
 
         # Remove rows where any landmarks are negative
@@ -55,17 +56,18 @@ class FetalLandmarks(data.Dataset):
         else:
             landmark_cols = self.landmarks_frame.columns[4:8]
 
-        mask = (self.landmarks_frame[landmark_cols] < 0).any(axis=1)
+        # mask = (self.landmarks_frame[landmark_cols] < 0).any(axis=1)
+        mask = (self.landmarks_frame[landmark_cols] < 0) | (self.landmarks_frame[landmark_cols].isna())
+        mask = mask.any(axis=1)
         self.landmarks_frame = self.landmarks_frame[~mask].reset_index(drop=True)
 
         if is_train:
             if self.anatomy == 'brain' or self.anatomy == 'abdomen':
-                landmarks = np.array(self.landmarks_frame.iloc[1:, 8:12].values, dtype=np.float32)
-                print(landmarks)
+                landmarks = np.array(self.landmarks_frame.iloc[:, 8:12].values, dtype=np.float32) # it was [1:, 8:12]
                 landmarks = landmarks.reshape(-1, 2)
                 self.d_vect = determine_direction(landmarks)
             else:
-                landmarks = np.array(self.landmarks_frame.iloc[1:, 4:8].values, dtype=np.float32)
+                landmarks = np.array(self.landmarks_frame.iloc[:, 4:8].values, dtype=np.float32) # it was [1:, 8:12]
                 landmarks = landmarks.reshape(-1, 2)
                 self.d_vect = determine_direction(landmarks)
 
@@ -92,11 +94,11 @@ class FetalLandmarks(data.Dataset):
         else:
             pts = self.landmarks_frame.iloc[idx, 4:8].values
         
-        pts = pts[[1,0,3,2]]
+        # pts = pts[[1,0,3,2]] # For Netanell: this is wrong
         pts = pts.astype('float').reshape(-1, 2)
 
-        # Clip the points 
-        pts = np.clip(pts, a_min=0, a_max=None)
+        # # Clip the points 
+        # pts = np.clip(pts, a_min=0, a_max=None)
 
         # print(f'pts: {pts}')
         
@@ -170,6 +172,14 @@ class FetalLandmarks(data.Dataset):
         return img, target, meta
 
 def determine_direction(pts_arr, do_plot = True):
+    if np.isnan(pts_arr).any():
+        print("The array contains NaN values.")
+    else:
+        print("The array does not contain any NaN values.")
+    nan_positions = np.argwhere(np.isnan(pts_arr))
+    print("NaN positions:", nan_positions)
+    nan_count = np.isnan(pts_arr).sum()
+    print(f"Number of NaN values in the array: {nan_count}")
     gmm = GaussianMixture(n_components=2)
     gmm.fit(pts_arr)
     if  do_plot:

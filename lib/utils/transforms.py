@@ -158,6 +158,7 @@ def transform_preds(coords, center, scale, output_size):
 
 
 def crop(img, center, scale, output_size, rot=0):
+    
     center_new = center.clone()
 
     # Preprocessing for efficient cropping
@@ -174,7 +175,7 @@ def crop(img, center, scale, output_size, rot=0):
                         if len(img.shape) > 2 else torch.zeros(output_size[0], output_size[1])
         else:
             # img = scipy.misc.imresize(img, [new_ht, new_wd])  # (0-1)-->(0-255)
-            img = cv2.resize(img, (new_wd, new_ht), interpolation=cv2.INTER_CUBIC)
+            img = cv2.resize(img, (new_wd, new_ht), interpolation=cv2.INTER_LINEAR)
             center_new[0] = center_new[0] * 1.0 / sf
             center_new[1] = center_new[1] * 1.0 / sf
             scale = scale / sf
@@ -208,14 +209,15 @@ def crop(img, center, scale, output_size, rot=0):
         # Remove padding
     #     new_img = scipy.misc.imrotate(new_img, rot)
     #     new_img = new_img[pad:-pad, pad:-pad]
-        center_tuple = (new_img.shape[1] / 2, new_img.shape[0] / 2)
+        # center_tuple = (new_img.shape[1] / 2, new_img.shape[0] / 2)
+        center_tuple = (new_img.shape[0] / 2, new_img.shape[1] / 2)
         # Create the rotation matrix
         rotation_matrix = cv2.getRotationMatrix2D(center_tuple, rot, scale=1.0)
         # Perform the actual rotation
-        new_img = cv2.warpAffine(new_img, rotation_matrix, (new_img.shape[1], new_img.shape[0]), flags=cv2.INTER_CUBIC)
+        new_img = cv2.warpAffine(new_img, rotation_matrix, (new_img.shape[1], new_img.shape[0]), flags=cv2.INTER_LINEAR)
         new_img = new_img[pad:-pad, pad:-pad]
 
-    new_img = cv2.resize(new_img, (output_size[1], output_size[0]), interpolation=cv2.INTER_CUBIC)
+    new_img = cv2.resize(new_img, (output_size[1], output_size[0]), interpolation=cv2.INTER_LINEAR)
     # new_img = scipy.misc.imresize(new_img, output_size)
     return new_img
 

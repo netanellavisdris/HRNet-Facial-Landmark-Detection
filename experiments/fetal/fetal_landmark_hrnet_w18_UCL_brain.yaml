@@ -4,10 +4,10 @@ PRINT_FREQ: 50
 
 DATASET:
   DATASET: FETAL
-  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/Abdomen'
-  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Train.csv'
-  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Test.csv'
-  ANATOMY: 'abdomen'
+  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Head'
+  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Train.csv'
+  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Test.csv'
+  ANATOMY: 'brain'
   FLIP: true
   SCALE_FACTOR: 0.25
   ROT_FACTOR: 30
