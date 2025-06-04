@@ -4,9 +4,9 @@ PRINT_FREQ: 50
 
 DATASET:
   DATASET: FETAL
-  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Head'
-  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Train.csv'
-  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Test.csv'
+  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/HC18/Head'
+  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/HC18/BPD_Train.csv'
+  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/HC18/BPD_Test.csv'
   ANATOMY: 'brain'
   FLIP: true
   SCALE_FACTOR: 0.25
