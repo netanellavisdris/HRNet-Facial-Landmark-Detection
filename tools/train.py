@@ -7,7 +7,9 @@
 import os
 import warnings
 warnings.filterwarnings("ignore")
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# Only set CUDA_VISIBLE_DEVICES if not already set (allows override from shell)
+if "CUDA_VISIBLE_DEVICES" not in os.environ:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 os.getcwd()
 
