@@ -1,21 +1,26 @@
 #!/bin/bash
 
+# This script runs all cross-validation tests for all anatomical structures and datasets.
+# author: chiaradivece
+# date: 2024-11-13
 # Define the list of datasets and anatomical structures
-datasets=("FP" "HC18" "UCL")
+datasets=("FP" "HC18" "UCL" "MULTICENTRE")
 structures=("brain" "femur" "abdomen")
 
 # Base directories
-BASE_DIR="/home/chiara/workspace/fetalbiometry_paper/HRNet-Facial-Landmark-Detection-Dev"
+# BASE_DIR="/home/chiara/workspace/fetalbiometry_paper/HRNet-Facial-Landmark-Detection-Dev" # FV-DGX
+BASE_DIR="/cdivece/workspace/fetalbiometry_paper/HRNet-Facial-Landmark-Detection-Dev" # Hoover
 EXPERIMENTS_DIR="$BASE_DIR/experiments/fetal"
 OUTPUT_DIR="$BASE_DIR/output/FETAL"
 
 # Loop over each anatomical structure
 for STRUCTURE in "${structures[@]}"
 do
-    # Loop over each combination of cfg_dataset and model_dataset
-    for CFG_DATASET in "${datasets[@]}"
-    do
-        for MODEL_DATASET in "${datasets[@]}"
+    # Loop over each combination of model_dataset and cfg_dataset
+    for MODEL_DATASET in "${datasets[@]}"
+        do
+        
+        for CFG_DATASET in "${datasets[@]}"
         do
             # Construct the paths for the configuration file and the model file
             CFG_FILE="$EXPERIMENTS_DIR/fetal_landmark_hrnet_w18_${CFG_DATASET}_${STRUCTURE}.yaml"
@@ -39,9 +44,9 @@ do
             fi
 
             # Run the test script
-            echo "Running test with CFG_DATASET: $CFG_DATASET, MODEL_DATASET: $MODEL_DATASET, STRUCTURE: $STRUCTURE"
+            echo "Running test with MODEL_DATASET: $MODEL_DATASET, CFG_DATASET: $CFG_DATASET, STRUCTURE: $STRUCTURE"
             python tools/test.py --cfg "$CFG_FILE" --model-file "$MODEL_FILE"
-            echo "Finished testing with CFG_DATASET: $CFG_DATASET, MODEL_DATASET: $MODEL_DATASET, STRUCTURE: $STRUCTURE"
+            echo "Finished testing with MODEL_DATASET: $MODEL_DATASET, CFG_DATASET: $CFG_DATASET, STRUCTURE: $STRUCTURE"
             echo "---------------------------------------------"
         done
     done
