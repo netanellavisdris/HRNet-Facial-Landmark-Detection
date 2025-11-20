@@ -20,8 +20,8 @@ from sklearn.mixture import GaussianMixture
 from ..utils.transforms import fliplr_joints, crop, generate_target, transform_pixel
 
 curidx = 0
-out_dir = "/tmp/OutTrain"
-os.makedirs(out_dir, exist_ok=True)
+# out_dir = "/tmp/OutTrain"
+# os.makedirs(out_dir, exist_ok=True)
 
 class FetalLandmarks(data.Dataset):
 
@@ -44,6 +44,7 @@ class FetalLandmarks(data.Dataset):
         self.flip = cfg.DATASET.FLIP
         self.reassign = cfg.TRAIN.REASSIGN
         self.anatomy = cfg.DATASET.ANATOMY
+        self.metrics = cfg.DATASET.METRICS
 
         # load annotations
         self.landmarks_frame = pd.read_csv(self.csv_file, header=0, sep=',')
@@ -51,10 +52,27 @@ class FetalLandmarks(data.Dataset):
         self.landmarks_frame.drop(self.landmarks_frame.columns[0], axis=1, inplace=True)
 
         # Remove rows where any landmarks are negative
-        if self.anatomy == 'brain' or self.anatomy == 'abdomen':
-            landmark_cols = self.landmarks_frame.columns[8:12]
+        if self.anatomy == 'brain':
+            if self.metrics == 'OFD':
+                landmark_cols = self.landmarks_frame.columns[4:8]  # OFD
+            elif self.metrics == 'BPD':
+                landmark_cols = self.landmarks_frame.columns[8:12]  # BPD
+            else:
+                raise ValueError(f"Metrics {self.metrics} not supported")
+        elif self.anatomy == 'abdomen':
+            if self.metrics == 'TAD':
+                landmark_cols = self.landmarks_frame.columns[4:8]   # TAD
+            elif self.metrics == 'APAD':
+                landmark_cols = self.landmarks_frame.columns[8:12]   # APAD
+            else:
+                raise ValueError(f"Metrics {self.metrics} not supported")
+        elif self.anatomy == 'femur':
+            if self.metrics == 'FL':
+                landmark_cols = self.landmarks_frame.columns[4:8]   # FL
+            else:
+                raise ValueError(f"Metrics {self.metrics} not supported")
         else:
-            landmark_cols = self.landmarks_frame.columns[4:8]
+            raise ValueError(f"Anatomy {self.anatomy} not supported")
 
         # mask = (self.landmarks_frame[landmark_cols] < 0).any(axis=1)
         mask = (self.landmarks_frame[landmark_cols] < 0) | (self.landmarks_frame[landmark_cols].isna())
@@ -62,14 +80,30 @@ class FetalLandmarks(data.Dataset):
         self.landmarks_frame = self.landmarks_frame[~mask].reset_index(drop=True)
 
         if is_train:
-            if self.anatomy == 'brain' or self.anatomy == 'abdomen':
-                landmarks = np.array(self.landmarks_frame.iloc[:, 8:12].values, dtype=np.float32) # it was [1:, 8:12]
-                landmarks = landmarks.reshape(-1, 2)
-                self.d_vect = determine_direction(landmarks)
+            if self.anatomy == 'brain':
+                if self.metrics == 'OFD':
+                    landmarks = np.array(self.landmarks_frame.iloc[:, 4:8].values, dtype=np.float32)  # OFD
+                elif self.metrics == 'BPD':
+                    landmarks = np.array(self.landmarks_frame.iloc[:, 8:12].values, dtype=np.float32)  # BPD
+                else:
+                    raise ValueError(f"Metrics {self.metrics} not supported")
+            elif self.anatomy == 'abdomen':
+                if self.metrics == 'TAD':
+                    landmarks = np.array(self.landmarks_frame.iloc[:, 4:8].values, dtype=np.float32)  # TAD
+                elif self.metrics == 'APAD':
+                    landmarks = np.array(self.landmarks_frame.iloc[:, 8:12].values, dtype=np.float32)  # APAD
+                else:
+                    raise ValueError(f"Metrics {self.metrics} not supported") 
+            elif self.anatomy == 'femur':
+                if self.metrics == 'FL':
+                    landmarks = np.array(self.landmarks_frame.iloc[:, 4:8].values, dtype=np.float32)  # FL
+                else:
+                    raise ValueError(f"Metrics {self.metrics} not supported")
             else:
-                landmarks = np.array(self.landmarks_frame.iloc[:, 4:8].values, dtype=np.float32) # it was [1:, 8:12]
-                landmarks = landmarks.reshape(-1, 2)
-                self.d_vect = determine_direction(landmarks)
+                raise ValueError(f"Anatomy {self.anatomy} not supported")
+
+            landmarks = landmarks.reshape(-1, 2)
+            self.d_vect = determine_direction(landmarks)
 
         self.mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
         self.std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -89,10 +123,27 @@ class FetalLandmarks(data.Dataset):
         center_h = self.landmarks_frame.iloc[idx, 3]
         center = torch.Tensor([center_w, center_h])
 
-        if self.anatomy == 'brain' or self.anatomy == 'abdomen':
-            pts = self.landmarks_frame.iloc[idx, 8:12].values
+        if self.anatomy == 'brain':
+            if self.metrics == 'OFD':
+                pts = self.landmarks_frame.iloc[idx, 4:8].values  # OFD
+            elif self.metrics == 'BPD':
+                pts = self.landmarks_frame.iloc[idx, 8:12].values  # BPD
+            else:
+                raise ValueError(f"Metrics {self.metrics} not supported")
+        elif self.anatomy == 'abdomen':
+            if self.metrics == 'TAD':
+                pts = self.landmarks_frame.iloc[idx, 4:8].values   # TAD
+            elif self.metrics == 'APAD':
+                pts = self.landmarks_frame.iloc[idx, 8:12].values   # APAD
+            else:
+                raise ValueError(f"Metrics {self.metrics} not supported")
+        elif self.anatomy == 'femur':
+            if self.metrics == 'FL':
+                pts = self.landmarks_frame.iloc[idx, 4:8].values   # FL
+            else:
+                raise ValueError(f"Metrics {self.metrics} not supported")
         else:
-            pts = self.landmarks_frame.iloc[idx, 4:8].values
+            raise ValueError(f"Anatomy {self.anatomy} not supported")
         
         # pts = pts[[1,0,3,2]] # For Netanell: this is wrong
         pts = pts.astype('float').reshape(-1, 2)
