@@ -4,13 +4,20 @@ PRINT_FREQ: 50
 
 DATASET:
   DATASET: FETAL
-  ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Head'
-  TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Train.csv'
-  TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Test.csv'
+  # FV-DGX
+  # ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Head'
+  # TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Train.csv'
+  # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Test.csv'
+  # Hoover
+  ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Head'
+  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Train.csv'
+  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/BPD_Test.csv'
   ANATOMY: 'brain'
   FLIP: true
-  SCALE_FACTOR: 0.25
-  ROT_FACTOR: 30
+  METRICS: 'BPD'
+  # METRICS: 'OFD'
+  SCALE_FACTOR: 0.25 # This was [-5, 5]% in BiometryNet + cropping
+  ROT_FACTOR: 30 # This was [-180, 180] degrees in BiometryNet
 MODEL:
   NAME: 'hrnet'
   NUM_JOINTS: 2
@@ -79,4 +86,4 @@ TRAIN:
   NESTEROV: false
   REASSIGN: true
 TEST:
-  BATCH_SIZE_PER_GPU: 64
+  BATCH_SIZE_PER_GPU: 64 

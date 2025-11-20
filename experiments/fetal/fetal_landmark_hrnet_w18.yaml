@@ -5,7 +5,7 @@ PRINT_FREQ: 50
 DATASET:
   DATASET: FETAL
   ROOT: './data/fetal/images'
-  TRAINSET: './data/fetal/data.csv'
+  TRAINSET: './data/fetal/train.csv'
   TESTSET: './data/fetal/test.csv'
   FLIP: true
   SCALE_FACTOR: 0.25
