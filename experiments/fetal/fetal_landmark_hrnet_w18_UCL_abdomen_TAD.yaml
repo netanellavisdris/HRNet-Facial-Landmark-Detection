@@ -5,16 +5,15 @@ PRINT_FREQ: 50
 DATASET:
   DATASET: FETAL
   # FV-DGX
-  # ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/BPD'
-  # TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/BPD_Train.csv'
-  # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/BPD_Test.csv'
+  # ROOT: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Abdomen'
+  # TRAINSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Abdomen_Train.csv'
+  # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Abdomen_Test.csv'
   # Hoover
-  ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/BPD'
-  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/FP/BPD_Train.csv'
-  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/FP/BPD_Test.csv'
-  ANATOMY: 'brain'
-  METRICS: 'BPD'
-  # METRICS: 'OFD'
+  ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Abdomen'
+  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Abdomen_Train.csv'
+  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Abdomen_Test.csv'
+  ANATOMY: 'abdomen'
+  METRICS: 'TAD'
   FLIP: true
   SCALE_FACTOR: 0.25 # This was [-5, 5]% in BiometryNet + cropping
   ROT_FACTOR: 30 # This was [-180, 180] degrees in BiometryNet
@@ -86,4 +85,4 @@ TRAIN:
   NESTEROV: false
   REASSIGN: true
 TEST:
-  BATCH_SIZE_PER_GPU: 64 # This was 16 in BiometryNet
+  BATCH_SIZE_PER_GPU: 64 

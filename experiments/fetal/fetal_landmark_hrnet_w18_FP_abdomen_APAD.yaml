@@ -13,8 +13,7 @@ DATASET:
   TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Train.csv'
   TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Test.csv'
   ANATOMY: 'abdomen'
-  METRICS: 'TAD'
-  # METRICS: 'APAD'
+  METRICS: 'APAD'
   FLIP: true
   SCALE_FACTOR: 0.25 # This was [-5, 5]% in BiometryNet + cropping
   ROT_FACTOR: 30 # This was [-180, 180] degrees in BiometryNet
