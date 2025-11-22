@@ -77,6 +77,7 @@ _C.DATASET.DATASET = 'AFLW'
 _C.DATASET.TRAINSET = ''
 _C.DATASET.TESTSET = ''
 _C.DATASET.ANATOMY = ''
+_C.DATASET.METRICS = ''
 
 # training data augmentation
 _C.DATASET.FLIP = True
