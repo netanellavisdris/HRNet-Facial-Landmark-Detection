@@ -10,8 +10,8 @@ DATASET:
   # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/HC18/BPD_Test.csv'
   # Hoover
   ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/HC18/Head'
-  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/HC18/Head_Train.csv'
-  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/HC18/Head_Test.csv'
+  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/HC18/Head_Train.csv'
+  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/HC18/Head_Test.csv'
   ANATOMY: 'brain'  
   METRICS: 'OFD'
   FLIP: true

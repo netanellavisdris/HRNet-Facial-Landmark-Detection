@@ -10,8 +10,8 @@ DATASET:
   # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Test.csv'
   # Hoover
   ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/FP/Abdomen'
-  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Train.csv'
-  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/FP/Abdomen_Test.csv'
+  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/FP/Abdomen_Train.csv'
+  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/FP/Abdomen_Test.csv'
   ANATOMY: 'abdomen'
   METRICS: 'TAD'
   FLIP: true

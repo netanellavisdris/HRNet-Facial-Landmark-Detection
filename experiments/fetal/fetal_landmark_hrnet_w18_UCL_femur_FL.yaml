@@ -10,8 +10,8 @@ DATASET:
   # TESTSET: '/home/chiara/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Femur_Test.csv'
   # Hoover
   ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/UCL/Femur'
-  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Femur_Train.csv'
-  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/UCL/Femur_Test.csv'
+  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/UCL/Femur_Train.csv'
+  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/UCL/Femur_Test.csv'
   ANATOMY: 'femur'
   METRICS: 'FL'
   FLIP: true

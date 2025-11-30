@@ -6,8 +6,8 @@ DATASET:
   DATASET: FETAL
   # Hoover
   ROOT: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/data/MULTICENTRE/Abdomen'
-  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/MULTICENTRE/Abdomen_Train.csv'
-  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/MULTICENTRE/Abdomen_Test.csv'
+  TRAINSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/MULTICENTRE/Abdomen_Train.csv'
+  TESTSET: '/cdivece/workspace/fetalbiometry_paper/fetalbiometrydata/annotations/MULTICENTRE/Abdomen_Test.csv'
   ANATOMY: 'abdomen'
   METRICS: 'TAD'
   FLIP: true
