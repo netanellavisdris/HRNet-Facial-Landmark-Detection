@@ -1,0 +1,60 @@
+\begin{table}[t]
+\centering
+\caption{Cross-validation results showing NME $\pm$ STD for all train-test combinations across four datasets (FP, HC18, UCL, MULTICENTRE) and three anatomies. ``Ours'' models (MULTICENTRE) are trained on combined data from all available datasets. For each metric, bold indicates the best result, and underline indicates the second-best result across all train-test combinations.}
+\label{tab:cross_validation}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Anatomy} & \textbf{Train} & \textbf{Test} & \multicolumn{2}{c|}{\textbf{NME$\pm$STD}} \\ \cline{4-5}
+\textbf{} & \textbf{} & \textbf{} & \textbf{BPD} & \textbf{OFD} \\ \hline
+\multirow{16}{*}{\textbf{Brain}}
+ & FP & FP & 0.4600$\pm$0.4835 & 0.4552$\pm$0.4817\\
+ & FP & HC18 & 0.5637$\pm$0.3572 & 0.5743$\pm$0.3257\\
+ & FP & UCL & 0.4583$\pm$0.3910 & 0.4780$\pm$0.3177\\
+ & FP & Ours & 0.4832$\pm$0.4576 & 0.4824$\pm$0.4500\\
+ \cline{2-5}
+ & HC18 & FP & 0.5731$\pm$0.4002 & 0.5021$\pm$0.4737\\
+ & HC18 & HC18 & 0.6324$\pm$0.3525 & 0.5785$\pm$0.2351\\
+ & HC18 & UCL & 0.7985$\pm$0.4653 & 0.5610$\pm$0.4265\\
+ & HC18 & Ours & 0.5932$\pm$0.3946 & 0.5209$\pm$0.4318\\
+ \cline{2-5}
+ & UCL & FP & 0.5044$\pm$0.4558 & 0.5033$\pm$0.4604\\
+ & UCL & HC18 & 0.6443$\pm$0.3445 & 0.5705$\pm$0.2371\\
+ & UCL & UCL & \underline{0.2439$\pm$0.3749} & \underline{0.2230$\pm$0.3728}\\
+ & UCL & Ours & 0.5281$\pm$0.4377 & 0.5099$\pm$0.4223\\
+ \cline{2-5}
+ & Ours & FP & 0.4600$\pm$0.4829 & 0.4564$\pm$0.4813\\
+ & Ours & HC18 & 0.5986$\pm$0.3394 & 0.5631$\pm$0.2350\\
+ & Ours & UCL & \textbf{0.2110$\pm$0.3822} & \textbf{0.1927$\pm$0.3700}\\
+ & Ours & Ours & 0.4837$\pm$0.4579 & 0.4724$\pm$0.4403\\
+ \hline
+\textbf{} & \textbf{} & \textbf{} & \textbf{APAD} & \textbf{TAD} \\ \hline
+\multirow{9}{*}{\textbf{Abdomen}}
+ & FP & FP & 0.5987$\pm$0.4527 & 0.6091$\pm$0.4482\\
+ & FP & UCL & \underline{0.4041$\pm$0.3800} & 0.5164$\pm$0.3663\\
+ & FP & Ours & 0.5696$\pm$0.4480 & 0.5952$\pm$0.4381\\
+ \cline{2-5}
+ & UCL & FP & 0.6258$\pm$0.3926 & 0.6271$\pm$0.3821\\
+ & UCL & UCL & \textbf{0.3149$\pm$0.4246} & \textbf{0.3518$\pm$0.4209}\\
+ & UCL & Ours & 0.5793$\pm$0.4127 & 0.5859$\pm$0.4004\\
+ \cline{2-5}
+ & Ours & FP & 0.4803$\pm$0.4625 & \underline{0.4735$\pm$0.4554}\\
+ & Ours & UCL & 0.7342$\pm$0.4071 & 0.7311$\pm$0.4078\\
+ & Ours & Ours & 0.5182$\pm$0.4635 & 0.5120$\pm$0.4578\\
+ \hline
+\textbf{} & \textbf{} & \textbf{} & \multicolumn{2}{c|}{\textbf{FL}} \\ \hline
+\multirow{9}{*}{\textbf{Femur}}
+ & FP & FP & \multicolumn{2}{c|}{\underline{0.0338$\pm$0.1168}}\\
+ & FP & UCL & \multicolumn{2}{c|}{0.8371$\pm$0.4023}\\
+ & FP & Ours & \multicolumn{2}{c|}{0.0916$\pm$0.2594}\\
+ \cline{2-5}
+ & UCL & FP & \multicolumn{2}{c|}{0.9839$\pm$0.1007}\\
+ & UCL & UCL & \multicolumn{2}{c|}{\textbf{0.0259$\pm$0.0410}}\\
+ & UCL & Ours & \multicolumn{2}{c|}{0.9150$\pm$0.2659}\\
+ \cline{2-5}
+ & Ours & FP & \multicolumn{2}{c|}{0.0369$\pm$0.1271}\\
+ & Ours & UCL & \multicolumn{2}{c|}{0.9994$\pm$0.0060}\\
+ & Ours & Ours & \multicolumn{2}{c|}{0.1060$\pm$0.2770}\\
+ \hline
+\end{tabular}
+\end{table}
+
